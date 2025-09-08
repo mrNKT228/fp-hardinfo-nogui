@@ -1,0 +1,106 @@
+use std::{
+    fs::{self, File},
+    io::Write,
+    path::Path,
+};
+
+use crate::hardware::{
+    cpu::get_cpu_info, gpu::get_gpu_info, host::get_host_info, ram::get_ram_info, rom::get_rom_info,
+};
+
+pub fn save(path: String, date: String) {
+    let cpu = get_cpu_info();
+    let gpu = get_gpu_info();
+    let ram = get_ram_info();
+    let rom = get_rom_info();
+    let host = get_host_info();
+
+    let cpu = cpu
+        .split('\n')
+        .filter(|line| line.len() > 0)
+        .map(|line| format!("<li>{}</li>", line))
+        .collect::<Vec<String>>()
+        .join("");
+
+    let gpu = gpu
+        .split('\n')
+        .filter(|line| line.len() > 0)
+        .map(|line| format!("<li>{}</li>", line))
+        .collect::<Vec<String>>()
+        .join("");
+
+    let rom = rom
+        .split('\n')
+        .filter(|line| line.len() > 0)
+        .map(|line| format!("<li>{}</li>", line))
+        .collect::<Vec<String>>()
+        .join("");
+
+    let html = format!(
+        "
+  <html>
+    <head>
+      <title>Отчёт от {date}</title>
+    </head>
+    <body>
+      <h1>Отчёт о аппаратном обеспечении ПК</h1>
+      <div class=\"group\">
+        <h2>Процессор:</h2>
+        <ul>
+          {cpu}
+        </ul>
+      </div>
+      <div class=\"group\">
+        <h2>Видеокарта:</h2>
+        <ul>
+          {gpu}
+        </ul>
+      </div>
+      <div class=\"group\">
+        <h2>ОЗУ:</h2>
+        <ul>
+          <li>{ram}</li>
+        </ul>
+      </div>
+      <div class=\"group\">
+        <h2>ПЗУ:</h2>
+        <ul>
+          {rom}
+        </ul>
+      </div>
+      <div class=\"group\">
+        <h2>Система:</h2>
+        <ul>
+          {host}
+        </ul>
+      </div>
+      <div class=\"metainfo\">
+        Отчёт сгенерирован {date}
+      </div>
+    </body>
+  </html>
+  "
+    );
+
+    println!("Generated HTML:\n{}", html);
+
+    if Path::new(&path).exists() {
+        if let Err(error) = fs::remove_file(&path) {
+            println!("Ошибка сохранения файла: {}", error);
+            return;
+        }
+    }
+
+    let mut file = match File::create(&path) {
+        Ok(file) => file,
+        Err(error) => {
+            println!("Ошибка сохранения файла: {}", error);
+            return;
+        }
+    };
+
+    if let Err(error) = file.write_all(html.as_bytes()) {
+        println!("Ошибка сохранения файла: {}", error);
+        return;
+    }
+}
