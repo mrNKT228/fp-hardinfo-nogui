@@ -47,7 +47,7 @@ pub fn save(path: Option<String>, date: String) {
     <title>Отчёт от {date}</title>
   </head>
   <body>
-    <h1>Отчёт о аппаратном обеспечении ПК</h1>
+    <h1>Отчёт об аппаратном обеспечении ПК</h1>
     <div class=\"group\">
       <h2>Процессор:</h2>
       <ul>
