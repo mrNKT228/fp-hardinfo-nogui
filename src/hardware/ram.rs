@@ -32,4 +32,3 @@ pub fn get_ram_info() -> String {
     }
   }
 }
-// /home/mrnkt/DEV/hardinfo/fp-hardinfo/fp.svg

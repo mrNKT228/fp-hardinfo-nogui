@@ -4,12 +4,9 @@ use std::{
   path::{Path, PathBuf},
 };
 
-use crate::{
-  hardware::{
-    cpu::get_cpu_info, gpu::get_gpu_info, host::get_host_info,
-    ram::get_ram_info, rom::get_rom_info,
-  },
-  utils::date,
+use crate::hardware::{
+  cpu::get_cpu_info, gpu::get_gpu_info, host::get_host_info, ram::get_ram_info,
+  rom::get_rom_info,
 };
 
 pub fn save(path: Option<String>, date: String) {
@@ -78,14 +75,12 @@ pub fn save(path: Option<String>, date: String) {
         <li>{host}</li>
       </ul>
     </div>
-    <div class=\"metainfo\">
+    <div class=\"meta-info\">
       Отчёт сгенерирован {date}
     </div>
   </body>
 </html>"
   );
-
-  println!("{}", html);
 
   if let Some(path) = path {
     let path = make_file_name(path, host, date);
@@ -109,6 +104,13 @@ pub fn save(path: Option<String>, date: String) {
       println!("Ошибка сохранения файла: {}", error);
       return;
     }
+
+    println!(
+      "{}",
+      path.to_str().unwrap_or("Ошибка преобразования имени файла")
+    );
+  } else {
+    println!("Ошибка сохранения отчёта: не указан путь к папке")
   }
 }
 
