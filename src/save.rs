@@ -120,21 +120,14 @@ fn make_file_name(base: String, host: String, date: String) -> PathBuf {
     return base;
   }
 
-  let mut name_candidate = build_path(
-    &base,
-    format!("{}_{}.html", escape_string(&host), escape_string(&date)),
-  );
+  let mut name_candidate =
+    build_path(&base, format!("{}_{}.html", escape_string(&host), date));
 
   let mut i = 0;
   while Path::new(&name_candidate).exists() {
     name_candidate = build_path(
       &base,
-      format!(
-        "{}_{}_{}.html",
-        escape_string(&host),
-        escape_string(&date),
-        i
-      ),
+      format!("{}_{}_{}.html", escape_string(&host), date, i),
     );
     i = i + 1;
   }
