@@ -6,3 +6,7 @@ edition = "2024"
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[package.metadata.deb]
+maintainer = "Nikita Pisarenko <pisarenkon@fizpribor.ru>"
+copyright = "2025, Nikita Pisarenko <pisarenkon@fizpribor.ru>"
