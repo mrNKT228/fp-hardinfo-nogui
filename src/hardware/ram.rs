@@ -2,7 +2,7 @@ use std::process::Command;
 
 use crate::utils::size::{byte_size_to_string, gigabytes};
 
-pub fn get_ram_info() -> String {
+pub fn get_ram_info() -> Result<String, String> {
   match Command::new("free").arg("-b").output() {
     Ok(output) => {
       let size = String::from_utf8_lossy(&output.stdout)
@@ -23,13 +23,11 @@ pub fn get_ram_info() -> String {
         .to_string()
         .parse::<usize>();
       match size {
-        Ok(size) => calc_ram(size),
-        Err(error) => format!("Ошибка получения информации: {}", error),
+        Ok(size) => Ok(calc_ram(size)),
+        Err(error) => Err(format!("Ошибка получения информации: {}", error)),
       }
     }
-    Err(error) => {
-      format!("Ошибка получения информации: {}", error)
-    }
+    Err(error) => Err(format!("Ошибка получения информации: {}", error)),
   }
 }
 

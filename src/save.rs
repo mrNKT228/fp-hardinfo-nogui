@@ -5,7 +5,10 @@ use std::{
 };
 
 use crate::hardware::{
-  cpu::get_cpu_info, gpu::get_gpu_info, host::get_host_info, ram::get_ram_info,
+  cpu::get_cpu_info,
+  gpu::get_gpu_info,
+  host::{self, get_host_info},
+  ram::get_ram_info,
   rom::get_rom_info,
 };
 
@@ -16,26 +19,45 @@ pub fn save(path: Option<String>, date: String) {
   let rom = get_rom_info();
   let host = get_host_info();
 
-  let cpu = cpu
-    .split('\n')
-    .filter(|line| line.len() > 0)
-    .map(|line| format!("<li>{}</li>", line))
-    .collect::<Vec<String>>()
-    .join("");
+  let cpu = match cpu {
+    Ok(cpu) => cpu
+      .split('\n')
+      .filter(|line| line.len() > 0)
+      .map(|line| format!("<li>{}</li>", line))
+      .collect::<Vec<String>>()
+      .join(""),
+    Err(error) => format!("<span class=\"error\">{}</span>", error),
+  };
 
-  let gpu = gpu
-    .split('\n')
-    .filter(|line| line.len() > 0)
-    .map(|line| format!("<li>{}</li>", line))
-    .collect::<Vec<String>>()
-    .join("");
+  let gpu = match gpu {
+    Ok(gpu) => gpu
+      .split('\n')
+      .filter(|line| line.len() > 0)
+      .map(|line| format!("<li>{}</li>", line))
+      .collect::<Vec<String>>()
+      .join(""),
+    Err(error) => format!("<span class=\"error\">{}</span>", error),
+  };
 
-  let rom = rom
-    .split('\n')
-    .filter(|line| line.len() > 0)
-    .map(|line| format!("<li>{}</li>", line))
-    .collect::<Vec<String>>()
-    .join("");
+  let rom = match rom {
+    Ok(rom) => rom
+      .split('\n')
+      .filter(|line| line.len() > 0)
+      .map(|line| format!("<li>{}</li>", line))
+      .collect::<Vec<String>>()
+      .join(""),
+    Err(error) => format!("<span class=\"error\">{}</span>", error),
+  };
+
+  let ram = match ram {
+    Ok(ram) => ram,
+    Err(error) => format!("<span class=\"error\">{}</span>", error),
+  };
+
+  let host_str = match host.clone() {
+    Ok(host) => host,
+    Err(error) => format!("<span class=\"error\">{}</span>", error),
+  };
 
   let html = format!(
     "<!DOCTYPE html>
@@ -44,6 +66,11 @@ pub fn save(path: Option<String>, date: String) {
     <title>Отчёт от {date}</title>
   </head>
   <body>
+    <style>
+     .error {{
+        color: grey;
+    }}
+    </style>
     <h1>Отчёт об аппаратном обеспечении ПК</h1>
     <div class=\"group\">
       <h2>Процессор:</h2>
@@ -72,7 +99,7 @@ pub fn save(path: Option<String>, date: String) {
     <div class=\"group\">
       <h2>Система:</h2>
       <ul>
-        <li>{host}</li>
+        <li>{host_str}</li>
       </ul>
     </div>
     <div class=\"meta-info\">
@@ -83,7 +110,8 @@ pub fn save(path: Option<String>, date: String) {
   );
 
   if let Some(path) = path {
-    let path = make_file_name(path, host, date);
+    let path =
+      make_file_name(path, host.unwrap_or("UNKNOWN-HOST".to_string()), date);
 
     if path.exists() {
       if let Err(error) = fs::remove_file(&path) {
